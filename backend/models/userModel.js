@@ -1,0 +1,75 @@
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+    {
+        fullName: { type: String, required: true },
+        username: { type: String, required: true, unique: true },
+        password: { type: String, required: true },
+        profilePhoto: { type: String, default: "" },
+        gender: { type: String, enum: ["Male", "Female"], required: true },
+        score: { type: Number, default: 0 },
+
+        role: { 
+            type: String, 
+            enum: ["user", "admin"], 
+            default: "user" 
+        },
+
+        interests: {
+            type: [{ type: String }],
+            validate: {
+                validator: function (v) {
+                    return new Set(v).size === v.length;
+                },
+                message: "Interests must be unique",
+            },
+        },
+
+        bucketList: [
+            {
+                text: { type: String, required: true },
+                achieved: { type: Boolean, default: false },
+            },
+        ],
+
+        acceptedChallenges: [
+            {
+                challengeText: { type: String, required: true },
+                acceptedAt: { type: Date, default: Date.now },
+                status: { type: String, enum: ["active", "completed", "skipped", "abandoned"], default: "active" },
+                timelineDays: { type: Number, default: 0 },
+                proofPostId: { type: mongoose.Schema.Types.ObjectId, ref: "Post" }
+            },
+        ],
+
+        followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        
+        // Connections Architecture (Mutuals / Pending Requests)
+        connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        receivedRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+        stats: {
+            totalAccepted: { type: Number, default: 0 },
+            totalCustomChallenges: { type: Number, default: 0 },
+            totalSkipped: { type: Number, default: 0 },
+            totalCompleted: { type: Number, default: 0 },
+            totalAbandoned: { type: Number, default: 0 },
+        },
+        lastSeen: { type: Date, default: Date.now },
+        isOnline: { type: Boolean, default: false },
+        isPrivate: { type: Boolean, default: false },
+
+        // Gamification & Core Loop 2.0
+        totalXP: { type: Number, default: 0 },
+        level: { type: Number, default: 1 },
+        currentStreak: { type: Number, default: 0 },
+        longestStreak: { type: Number, default: 0 },
+        lastActiveDate: { type: Date },
+        badges: [{ type: String }],
+    },
+    { timestamps: true }
+);
+
+export const User = mongoose.model("User", userSchema);

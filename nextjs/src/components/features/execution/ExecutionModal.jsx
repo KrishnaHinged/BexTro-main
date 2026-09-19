@@ -9,6 +9,7 @@ import ReflectionModal from "./ReflectionModal";
 
 const ExecutionModal = ({ task, onClose, onSessionFinished }) => {
     const plannedMinutes = task?.timeBlockMinutes || 35;
+    const [totalPlannedSeconds, setTotalPlannedSeconds] = useState(plannedMinutes * 60);
     const [secondsLeft, setSecondsLeft] = useState(plannedMinutes * 60);
     const [isActive, setIsActive] = useState(true);
     const [totalElapsedSeconds, setTotalElapsedSeconds] = useState(0);
@@ -49,6 +50,7 @@ const ExecutionModal = ({ task, onClose, onSessionFinished }) => {
 
     const handleExtend = (extraMinutes = 10) => {
         setSecondsLeft(prev => prev + extraMinutes * 60);
+        setTotalPlannedSeconds(prev => prev + extraMinutes * 60);
         toast.success(`+${extraMinutes} minutes added`);
     };
 
@@ -62,11 +64,21 @@ const ExecutionModal = ({ task, onClose, onSessionFinished }) => {
                 category: task?.category || "Personal"
             });
             const plan = res.data.plan;
-            setAiHelp(plan?.starterDailyTasks?.map(t => t.title) || [
-                "Break task into 1 clear initial output.",
-                "Eliminate tabs and secondary distractions.",
-                "Execute the first 10 minutes continuously."
-            ]);
+            const steps = (plan?.starterDailyTasks || [])
+                .map(t => typeof t === "string" ? t : t.title || t.text)
+                .filter(Boolean);
+
+            if (steps.length > 0) {
+                setAiHelp(steps);
+            } else if (plan?.milestones?.length > 0) {
+                setAiHelp(plan.milestones.map(m => typeof m === "string" ? m : m.title).filter(Boolean));
+            } else {
+                setAiHelp([
+                    "Break task into 1 clear initial output.",
+                    "Eliminate tabs and secondary distractions.",
+                    "Execute the first 10 minutes continuously."
+                ]);
+            }
         } catch (error) {
             setAiHelp([
                 "Define the very first line or action you need to produce.",
@@ -101,6 +113,7 @@ const ExecutionModal = ({ task, onClose, onSessionFinished }) => {
             <ReflectionModal
                 task={task}
                 actualMinutes={Math.max(1, Math.round(totalElapsedSeconds / 60))}
+                initialNotes={notes}
                 onClose={onClose}
                 onCompleted={() => {
                     if (onSessionFinished) onSessionFinished();
@@ -110,7 +123,7 @@ const ExecutionModal = ({ task, onClose, onSessionFinished }) => {
         );
     }
 
-    const progressPercentage = Math.min(100, Math.round(((plannedMinutes * 60 - secondsLeft) / (plannedMinutes * 60)) * 100));
+    const progressPercentage = Math.max(0, Math.min(100, Math.round(((totalPlannedSeconds - secondsLeft) / (totalPlannedSeconds || 1)) * 100)));
 
     return (
         <AnimatePresence>

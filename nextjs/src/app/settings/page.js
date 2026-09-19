@@ -15,16 +15,10 @@ import ChallengesTab from "@/components/features/setting_tab/ChallengesTab";
 import { themes } from "@/utils/theme";
 
 export default function SettingsPage() {
-  const [step, setStep] = useState(1);
   const [activeTab, setActiveTab] = useState("profile");
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
   const dispatch = useDispatch();
   const router = useRouter();
-
-  useEffect(() => {
-    const timer = setTimeout(() => setStep(2), 1500);
-    return () => clearTimeout(timer);
-  }, []);
 
   const toggleTheme = () => {
     setCurrentThemeIndex((prev) => (prev + 1) % themes.length);
@@ -50,12 +44,9 @@ export default function SettingsPage() {
 
   return (
     <div className="flex min-h-screen bg-cream text-charcoal font-sans-clean">
-      {step === 1 && <PageLoader message="Settings..." />}
-      {step === 2 && (
-        <>
-          <MainSlideBar />
-          <div className="flex-1 p-6 md:p-10 overflow-y-auto">
-            <div className="flex justify-between items-center mb-8">
+      <MainSlideBar />
+      <div className="flex-1 p-6 md:p-10 overflow-y-auto">
+        <div className="flex justify-between items-center mb-8">
               <h1 className="text-3xl md:text-5xl font-serif-elegant font-normal text-charcoal tracking-tight">
                 Settings<span className="text-indigo-600">.</span>
               </h1>
@@ -93,8 +84,6 @@ export default function SettingsPage() {
               {activeTab === "challenges" && <ChallengesTab />}
             </div>
           </div>
-        </>
-      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '@/api/axios';
 import { motion } from 'framer-motion';
-import { FaHeart, FaRegHeart, FaEllipsisV } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaEllipsisV, FaArrowRight, FaExternalLinkAlt } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -45,6 +45,7 @@ export default function PostCard({ post, currentUser }) {
     };
 
     const handleFollow = async () => {
+        if (post.isChallengeDiscovery) return;
         const previousStatus = followStatus;
         const nextStatus = previousStatus === "following" ? "none" : "following";
         setFollowStatus(nextStatus);
@@ -72,7 +73,7 @@ export default function PostCard({ post, currentUser }) {
             <div className="relative">
 
                 {/* IMAGE */}
-                {post.proofType === "image" && (
+                {post.proofType === "image" && post.proofUrl && (
                     <img
                         src={post.proofUrl}
                         alt="post"
@@ -81,7 +82,7 @@ export default function PostCard({ post, currentUser }) {
                 )}
 
                 {/* VIDEO */}
-                {post.proofType === "video" && (
+                {post.proofType === "video" && post.proofUrl && (
                     <video
                         src={post.proofUrl}
                         controls
@@ -89,57 +90,85 @@ export default function PostCard({ post, currentUser }) {
                     />
                 )}
 
-                {/* LINK / BLOG */}
-                {(post.proofType === "link" || post.proofType === "blog") && (
-                    <a
-                        href={post.proofUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block p-5 bg-white hover:bg-cream/40 transition-colors border-b border-cream-dark/50"
-                    >
-                        <p className="text-sm font-semibold text-charcoal line-clamp-2">
+                {/* AI CHALLENGE DISCOVERY CARD */}
+                {post.isChallengeDiscovery ? (
+                    <div className="p-5 bg-gradient-to-br from-indigo-50/60 to-purple-50/30 border-b border-cream-dark/40">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">
+                                Suggested Goal Challenge
+                            </span>
+                        </div>
+                        <h3 className="text-sm font-semibold text-charcoal leading-snug">
                             {post.challengeText}
-                        </p>
-                        <span className="text-[10px] text-indigo-600 font-bold tracking-wider uppercase mt-2 inline-block">
-                            View Proof Link <i className="fa-solid fa-arrow-up-right-from-square text-[8px] ml-0.5"></i>
-                        </span>
-                    </a>
-                )}
+                        </h3>
+                    </div>
+                ) : (post.proofType === "link" || post.proofType === "blog") && post.proofUrl ? (
+                    /* REGULAR PROOF LINK */
+                    (() => {
+                        const isSafeProtocol = /^https?:\/\//i.test(post.proofUrl?.trim());
+                        return isSafeProtocol ? (
+                            <a
+                                href={post.proofUrl.trim()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block p-5 bg-white hover:bg-cream/40 transition-colors border-b border-cream-dark/50"
+                            >
+                                <p className="text-sm font-semibold text-charcoal line-clamp-2">
+                                    {post.challengeText || "Proof of Work Link"}
+                                </p>
+                                <span className="text-[10px] text-indigo-600 font-bold tracking-wider uppercase mt-2 inline-flex items-center gap-1">
+                                    View Proof Link <FaExternalLinkAlt size={8} />
+                                </span>
+                            </a>
+                        ) : (
+                            <div className="p-5 bg-white border-b border-cream-dark/50">
+                                <p className="text-sm font-semibold text-charcoal line-clamp-2">
+                                    {post.challengeText || "Proof of Work"}
+                                </p>
+                            </div>
+                        );
+                    })()
+                ) : null}
 
                 {/* HOVER OVERLAY */}
                 <div className="absolute inset-0 bg-black/35 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                     {post.isChallengeDiscovery ? (
                         <button 
                             onClick={(e) => { e.stopPropagation(); router.push('/set_challenges'); }}
-                            className="bg-charcoal text-white text-xs px-5 py-2.5 rounded-full font-bold shadow-lg hover:bg-black transition cursor-pointer"
+                            className="bg-charcoal text-white text-xs px-5 py-2.5 rounded-full font-bold shadow-lg hover:bg-black transition cursor-pointer flex items-center gap-1.5"
                         >
-                            Take Challenge
+                            <span>Take Challenge</span>
+                            <FaArrowRight size={10} />
                         </button>
                     ) : (
-                        <button className="bg-indigo-600 text-white text-xs px-4 py-2.5 rounded-full font-semibold shadow cursor-pointer">
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); router.push(`/user/${post.user?._id}`); }}
+                            className="bg-indigo-600 text-white text-xs px-4 py-2.5 rounded-full font-semibold shadow cursor-pointer"
+                        >
                             Inspect
                         </button>
                     )}
                 </div>
 
                 {/* TOP RIGHT ACTIONS */}
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition flex gap-2">
+                {!post.isChallengeDiscovery && (
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition flex gap-2">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleLike(); }}
+                            className="bg-white/90 hover:bg-white text-charcoal p-2.5 rounded-full shadow-md cursor-pointer transition-colors"
+                        >
+                            {isLiked ? <FaHeart className="text-red-500 text-xs" /> : <FaRegHeart className="text-xs" />}
+                        </button>
 
-                    <button
-                        onClick={(e) => { e.stopPropagation(); handleLike(); }}
-                        className="bg-white/90 hover:bg-white text-charcoal p-2.5 rounded-full shadow-md cursor-pointer transition-colors"
-                    >
-                        {isLiked ? <FaHeart className="text-red-500 text-xs" /> : <FaRegHeart className="text-xs" />}
-                    </button>
-
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-                        className="bg-white/90 hover:bg-white text-charcoal p-2.5 rounded-full shadow-md cursor-pointer transition-colors"
-                    >
-                        <FaEllipsisV className="text-[10px]" />
-                    </button>
-
-                </div>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+                            className="bg-white/90 hover:bg-white text-charcoal p-2.5 rounded-full shadow-md cursor-pointer transition-colors"
+                        >
+                            <FaEllipsisV className="text-[10px]" />
+                        </button>
+                    </div>
+                )}
 
                 {/* VISIBILITY BADGE */}
                 {post.visibility === 'private' && (
@@ -153,10 +182,11 @@ export default function PostCard({ post, currentUser }) {
 
             {/* USER INFO */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-cream-dark/30">
-
                 <div
                     className="flex items-center gap-2 cursor-pointer"
-                    onClick={() => router.push(`/user/${post.user?._id}`)}
+                    onClick={() => {
+                        if (!post.isChallengeDiscovery) router.push(`/user/${post.user?._id}`);
+                    }}
                 >
                     <img
                         src={profilePhotoUrl}
@@ -169,7 +199,11 @@ export default function PostCard({ post, currentUser }) {
                     </span>
                 </div>
 
-                {currentUser?._id !== post.user?._id && (
+                {post.isChallengeDiscovery ? (
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        Discovery
+                    </span>
+                ) : currentUser?._id !== post.user?._id && (
                     <button
                         onClick={(e) => { e.stopPropagation(); handleFollow(); }}
                         className={`text-[10px] font-bold px-3 py-1.5 rounded-full transition cursor-pointer border ${
@@ -183,12 +217,22 @@ export default function PostCard({ post, currentUser }) {
                 )}
             </div>
 
-            {/* TEXT */}
-            {post.challengeText && (
-                <p className="px-4 pt-3.5 pb-4 text-xs sm:text-sm text-charcoal/80 font-medium leading-relaxed line-clamp-2">
+            {/* BODY TEXT / CAPTION (NO DUPLICATION) */}
+            {post.isChallengeDiscovery ? (
+                post.description && (
+                    <p className="px-4 pt-3 pb-4 text-xs text-charcoal/70 font-normal leading-relaxed">
+                        {post.description}
+                    </p>
+                )
+            ) : post.description ? (
+                <p className="px-4 pt-3 pb-4 text-xs sm:text-sm text-charcoal/80 font-medium leading-relaxed">
+                    {post.description}
+                </p>
+            ) : post.challengeText && post.proofType !== "link" && post.proofType !== "blog" ? (
+                <p className="px-4 pt-3 pb-4 text-xs sm:text-sm text-charcoal/80 font-medium leading-relaxed">
                     {post.challengeText}
                 </p>
-            )}
+            ) : null}
 
         </motion.div>
     );

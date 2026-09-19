@@ -138,3 +138,36 @@
   }
 }
 
+/* Signature Loaders Container & Gradient Styles */
+#loader,
+#loader_c {
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    height: 100vh;
+}
+
+#loader::-webkit-scrollbar,
+#loader_c::-webkit-scrollbar {
+    display: none;
+}
+
+.bextro-gradient-text {
+    font-family: 'Outfit', sans-serif;
+    background: linear-gradient(to right, rgb(47, 47, 255), rgb(255, 180, 255)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    color: transparent !important;
+}
+
+@media (max-width: 600px) {
+    #loader h1,
+    #loader_c h1 {
+        font-size: 8vw;
+    }
+}
+
+

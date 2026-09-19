@@ -13,17 +13,22 @@ export default function SocketProvider({ children }) {
   const { isAuthenticated, authUser } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (isAuthenticated && authUser?._id) {
+    const userId = authUser?._id;
+    if (isAuthenticated && userId) {
+      // Create a single clean socket connection; do not reconnect in loop if backend is offline
       const socket = io(ROOT_URL, {
         withCredentials: true,
-        query: { userId: authUser._id },
-        transports: ["websocket", "polling"],
+        query: { userId },
+        transports: ["polling", "websocket"],
+        reconnection: false,
+        timeout: 1500,
+        autoConnect: true,
       });
 
       dispatch(setSocket(socket));
 
       socket.on("connect", () => {
-        console.log("Connected to Socket.IO server");
+        // Connected successfully
       });
 
       socket.on("onlineUsers", (onlineUsers) => {
@@ -51,17 +56,21 @@ export default function SocketProvider({ children }) {
         });
       });
 
-      socket.on("connect_error", (error) => {
-        // Socket connection may fail silently if backend socket server is offline
-        console.warn("Socket.IO connection notice:", error.message);
+      socket.on("connect_error", () => {
+        // Backend socket port offline: close cleanly without logging or re-trying
+        try {
+          socket.close();
+        } catch (_) {}
       });
 
       return () => {
-        socket.disconnect();
+        try {
+          socket.disconnect();
+        } catch (_) {}
         dispatch(setSocket(null));
       };
     }
-  }, [isAuthenticated, authUser, dispatch]);
+  }, [isAuthenticated, authUser?._id, dispatch]);
 
   return (
     <>

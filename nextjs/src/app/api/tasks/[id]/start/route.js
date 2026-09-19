@@ -1,6 +1,27 @@
-import { proxyToBackend } from "@/lib/proxyToBackend";
+import connectDB from "@/lib/db";
+import { Task } from "@/models/Task";
+import { verifyAuth } from "@/lib/auth";
 
 export async function POST(req, { params }) {
-  const { id } = await params;
-  return proxyToBackend(req, `/tasks/${id}/start`);
+  try {
+    await connectDB();
+    const { userId } = await verifyAuth(req);
+    const { id } = await params;
+
+    const task = await Task.findOneAndUpdate(
+      { _id: id, userId },
+      { status: "in_progress", startedAt: new Date() },
+      { returnDocument: 'after' }
+    );
+
+    if (!task) {
+      return Response.json({ message: "Task not found" }, { status: 404 });
+    }
+
+    return Response.json({ task, message: "Focus session started" }, { status: 200 });
+  } catch (error) {
+    if (!error.message?.includes("token")) console.error("Task Start Error:", error);
+    const status = error.message?.includes("token") ? 401 : 500;
+    return Response.json({ message: error.message || "Failed to start task" }, { status });
+  }
 }

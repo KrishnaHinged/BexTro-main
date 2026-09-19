@@ -228,9 +228,26 @@ export default function FeedPage() {
                             ))}
                         </Masonry>
                     ) : (
-                        <div className="py-20 text-center bg-cream-card border border-cream-dark/80 rounded-[2.5rem] max-w-md mx-auto">
-                            <h3 className="text-xl font-serif-elegant font-normal text-charcoal mb-2">Feed is Quiet</h3>
-                            <p className="text-sm text-charcoal/50 max-w-xs mx-auto">No actions have been verified in this track yet. Be the first to post proof!</p>
+                        <div className="py-16 text-center bg-cream-card border border-cream-dark/80 rounded-[2.5rem] max-w-md mx-auto p-8 shadow-sm">
+                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto mb-4 text-xl">
+                                {activeTab === 'connections' ? '🤝' : '🌱'}
+                            </div>
+                            <h3 className="text-xl font-serif-elegant font-normal text-charcoal mb-2">
+                                {activeTab === 'connections' ? 'No Connection Proofs Yet' : 'Feed is Quiet'}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-charcoal/60 max-w-xs mx-auto mb-5 leading-relaxed">
+                                {activeTab === 'connections'
+                                    ? "Builders you follow haven't posted new proofs yet. Explore the For You feed or connect with others!"
+                                    : "No actions have been verified in this track yet. Be the first to post proof!"}
+                            </p>
+                            {activeTab === 'connections' && (
+                                <button
+                                    onClick={() => setActiveTab('foryou')}
+                                    className="px-6 py-2.5 bg-charcoal hover:bg-black text-white text-xs font-bold rounded-full shadow transition cursor-pointer"
+                                >
+                                    Explore For You
+                                </button>
+                            )}
                         </div>
                     )}
 

@@ -9,10 +9,19 @@ export async function POST(req, { params }) {
     await connectDB();
     const { userId: senderId } = await verifyAuth(req);
     const { id: communityId } = await params;
-    const { message } = await req.json();
+    const body = await req.json();
+    const message = typeof body?.message === "string" ? body.message.trim() : "";
+
+    if (!message || message.length === 0) {
+      return Response.json({ message: "Message cannot be empty." }, { status: 400 });
+    }
+    if (message.length > 5000) {
+      return Response.json({ message: "Message is too long (maximum 5000 characters)." }, { status: 400 });
+    }
 
     const community = await Community.findById(communityId);
-    if (!community || !community.members.includes(senderId)) {
+    const isMember = (community?.members || []).some(id => id.toString() === senderId.toString());
+    if (!community || !isMember) {
       return Response.json({ message: "You must be a member of this community to chat here." }, { status: 403 });
     }
 

@@ -11,24 +11,28 @@ import PageLoader from "@/components/common/loaders/pagesLoader";
 
 export default function Dashboard() {
     const [user, setUser] = useState(null);
-    const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(true);
     const [refetchTrigger, setRefetchTrigger] = useState(0);
 
     useEffect(() => {
-        const stepTimer = setTimeout(() => setStep(2), 2000);
+        let mounted = true;
 
         const fetchUser = async () => {
             try {
                 const res = await axiosInstance.get("/user/profile");
-                setUser(res.data);
+                if (mounted) setUser(res.data);
             } catch (error) {
                 console.error("Error fetching user data:", error);
+            } finally {
+                if (mounted) setLoading(false);
             }
         };
 
         fetchUser();
 
-        return () => clearTimeout(stepTimer);
+        return () => {
+            mounted = false;
+        };
     }, [refetchTrigger]);
 
     const handleChallengeAction = () => {
@@ -41,10 +45,10 @@ export default function Dashboard() {
 
             <div className="flex-1 p-6 md:p-10 overflow-y-auto">
                 <AnimatePresence>
-                    {step === 1 && <PageLoader message="Preparing your dashboard..." />}
+                    {loading && <PageLoader message="Preparing your dashboard..." />}
                 </AnimatePresence>
 
-                {step === 2 && (
+                {!loading && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

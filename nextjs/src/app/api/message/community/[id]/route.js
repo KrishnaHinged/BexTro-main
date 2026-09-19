@@ -10,7 +10,8 @@ export async function GET(req, { params }) {
     const { id: communityId } = await params;
 
     const community = await Community.findById(communityId);
-    if (!community || !community.members.includes(senderId)) {
+    const isMember = (community?.members || []).some(id => id.toString() === senderId.toString());
+    if (!community || !isMember) {
       return Response.json({ message: "You must be a member to read this chat." }, { status: 403 });
     }
 

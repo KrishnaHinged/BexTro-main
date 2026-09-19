@@ -105,24 +105,20 @@ export default function Challenges() {
             setTimeout(() => {
                 setShowLoaderScreen(false);
                 router.push("/dashboard");
-            }, 4000);
-        }, 3000);
+            }, 2900);
+        }, 3500);
     };
 
     return (
         <>
             {/* Loader Overlay */}
             {showLoader && (
-                <div className="fixed inset-0 z-[999] bg-black/60 flex items-center justify-center">
-                    <LoaderC isVisible={showLoader} />
-                </div>
+                <LoaderC isVisible={showLoader} />
             )}
 
             {/* Loader Screen */}
             {showLoaderScreen && (
-                <div className="fixed inset-0 z-[998] bg-gray-900">
-                    <LoaderScreen />
-                </div>
+                <LoaderScreen />
             )}
 
             {/* Accept Modal */}

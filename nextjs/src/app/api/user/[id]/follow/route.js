@@ -20,7 +20,7 @@ export async function POST(req, { params }) {
         return Response.json({ message: "User not found" }, { status: 404 });
     }
 
-    const isFollowing = currentUser.following.includes(targetUserId);
+    const isFollowing = (currentUser.following || []).some(id => id.toString() === targetUserId.toString());
 
     if (isFollowing) {
         currentUser.following = currentUser.following.filter(id => id.toString() !== targetUserId.toString());

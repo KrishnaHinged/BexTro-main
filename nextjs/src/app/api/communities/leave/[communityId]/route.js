@@ -11,11 +11,12 @@ export async function POST(req, { params }) {
     const community = await Community.findById(communityId);
     if (!community) return Response.json({ message: "Community not found" }, { status: 404 });
 
-    if (!community.members.includes(userId)) {
+    const isMember = (community.members || []).some(id => id.toString() === userId.toString());
+    if (!isMember) {
       return Response.json({ message: "Not a member" }, { status: 400 });
     }
 
-    community.members = community.members.filter(id => id.toString() !== userId);
+    community.members = (community.members || []).filter(id => id.toString() !== userId.toString());
     await community.save();
 
     return Response.json({ message: "You left the community", communityId, success: true }, { status: 200 });

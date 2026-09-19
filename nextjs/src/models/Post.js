@@ -23,11 +23,14 @@ const postSchema = new mongoose.Schema(
         comments: [commentSchema],
         visibility: { 
             type: String, 
-            enum: ["public", "private"], 
+            enum: ["public", "private", "connections"], 
             default: "public" 
         },
     },
     { timestamps: true }
 );
+
+postSchema.index({ user: 1, createdAt: -1 });
+postSchema.index({ visibility: 1, createdAt: -1 });
 
 export const Post = mongoose.models.Post || mongoose.model("Post", postSchema);

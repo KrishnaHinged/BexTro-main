@@ -37,16 +37,15 @@ export async function POST(req) {
     let profilePhotoPath = "";
     const file = formData.get("profilePhoto");
     if (file && typeof file === "object" && file.name) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      const { validateAndExtractUpload } = await import("@/lib/uploadSecurity");
+      const { safeFilename, buffer } = await validateAndExtractUpload(file, "community");
 
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
       await mkdir(uploadsDir, { recursive: true });
 
-      const filename = `community-${Date.now()}${path.extname(file.name)}`;
-      const filePath = path.join(uploadsDir, filename);
+      const filePath = path.join(uploadsDir, safeFilename);
       await writeFile(filePath, buffer);
-      profilePhotoPath = `/uploads/${filename}`;
+      profilePhotoPath = `/uploads/${safeFilename}`;
     }
 
     const newCommunity = await Community.create({

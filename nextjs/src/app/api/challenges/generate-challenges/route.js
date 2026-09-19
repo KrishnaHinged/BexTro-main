@@ -65,7 +65,7 @@ Return ONLY valid JSON (no markdown, no extra text):
           }
         }
       } catch (geminiErr) {
-        console.warn("Gemini failed, using fallback:", geminiErr.message);
+        // Fallback engine activated silently
       }
     }
 
@@ -100,13 +100,21 @@ Return ONLY valid JSON (no markdown, no extra text):
         benefits: Array.isArray(c.benefits) ? c.benefits : ["Growth", "Joy"]
       }));
 
-    // Save generated challenges
+    // Save generated challenges (upsert to prevent duplicate key errors)
     await Promise.all(
       finalChallenges.map(ch =>
-        Challenge.create({
-          ...ch,
-          createdFromInterests: keywords,
-          source: "AI"
+        Challenge.findOneAndUpdate(
+          { text: ch.text },
+          {
+            $set: {
+              ...ch,
+              createdFromInterests: keywords,
+              source: "AI"
+            }
+          },
+          { upsert: true, returnDocument: 'after' }
+        ).catch(err => {
+          return null;
         })
       )
     );
@@ -114,7 +122,7 @@ Return ONLY valid JSON (no markdown, no extra text):
     return Response.json({ challenges: finalChallenges }, { status: 200 });
 
   } catch (error) {
-    console.error("Generate Challenges Route Error:", error);
+    if (!error.message?.includes("token")) console.error("Generate Challenges Route Error:", error);
     // Bulletproof hard fallback
     return Response.json({
       challenges: [

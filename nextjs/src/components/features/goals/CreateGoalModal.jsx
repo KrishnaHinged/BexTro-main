@@ -32,7 +32,8 @@ const CreateGoalModal = ({ onClose, onGoalCreated }) => {
         setLoading(true);
         try {
             const res = await axiosInstance.post("/goals/ai-plan", goalInput);
-            setAiPlan(res.data.plan);
+            const planData = res.data.plan || res.data.aiPlan;
+            setAiPlan(planData);
             setStep(2);
         } catch (error) {
             console.error("AI Goal Plan error:", error);
@@ -196,7 +197,7 @@ const CreateGoalModal = ({ onClose, onGoalCreated }) => {
                                     Structured Trajectory Breakdown
                                 </h2>
                                 <p className="text-xs text-charcoal/60 mt-0.5">
-                                    AI generated 4 milestones, measurable deliverables, and starter moves.
+                                    AI generated prioritized milestones, measurable deliverables, and starter moves.
                                 </p>
                             </div>
 
@@ -224,12 +225,12 @@ const CreateGoalModal = ({ onClose, onGoalCreated }) => {
                                                     {idx + 1}
                                                 </span>
                                                 <div>
-                                                    <h4 className="text-xs font-bold text-charcoal">{m.title}</h4>
-                                                    <p className="text-[11px] text-charcoal/50">{m.keyDeliverable}</p>
+                                                    <h4 className="text-xs font-bold text-charcoal">{m.title || `Phase ${idx + 1}`}</h4>
+                                                    <p className="text-[11px] text-charcoal/50">{m.keyDeliverable || m.deliverable || "Core milestone deliverable"}</p>
                                                 </div>
                                             </div>
                                             <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                                ~{m.estimatedWeeks || 2} wks
+                                                ~{m.estimatedWeeks || m.targetWeeks || 2} wks
                                             </span>
                                         </div>
                                     ))}
@@ -245,9 +246,17 @@ const CreateGoalModal = ({ onClose, onGoalCreated }) => {
                                     <div className="flex items-center justify-between text-xs font-bold text-charcoal">
                                         <span className="inline-flex items-center gap-1.5">
                                             <FaBolt size={11} className="text-amber-500" />
-                                            <span>{aiPlan.starterDailyTasks[0]?.title}</span>
+                                            <span>
+                                                {typeof aiPlan.starterDailyTasks[0] === "string"
+                                                    ? aiPlan.starterDailyTasks[0]
+                                                    : (aiPlan.starterDailyTasks[0]?.title || "First actionable step")}
+                                            </span>
                                         </span>
-                                        <span className="text-charcoal/50">{aiPlan.starterDailyTasks[0]?.timeBlockMinutes} mins</span>
+                                        <span className="text-charcoal/50">
+                                            {typeof aiPlan.starterDailyTasks[0] === "object"
+                                                ? (aiPlan.starterDailyTasks[0]?.timeBlockMinutes || 25)
+                                                : 25} mins
+                                        </span>
                                     </div>
                                 </div>
                             )}

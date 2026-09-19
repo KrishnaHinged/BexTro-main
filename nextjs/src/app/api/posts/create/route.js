@@ -29,7 +29,15 @@ export async function POST(req) {
       return Response.json({ message: "Invalid proofType." }, { status: 400 });
     }
 
-    let finalProofUrl = proofUrl;
+    if (challengeText.length > 300) {
+      return Response.json({ message: "Challenge text must be under 300 characters." }, { status: 400 });
+    }
+
+    if (description && description.length > 3000) {
+      return Response.json({ message: "Description must be under 3000 characters." }, { status: 400 });
+    }
+
+    let finalProofUrl = proofUrl ? proofUrl.trim() : "";
 
     const file = formData.get("proofFile");
     if (proofType === "image" || proofType === "video") {
@@ -37,24 +45,19 @@ export async function POST(req) {
         return Response.json({ message: "Proof file is required for image and video types." }, { status: 400 });
       }
       if (file && typeof file === "object" && file.name) {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        const { validateAndExtractUpload } = await import("@/lib/uploadSecurity");
+        const { safeFilename, buffer } = await validateAndExtractUpload(file, "proofFile");
 
         const uploadsDir = path.join(process.cwd(), "public", "uploads");
         await mkdir(uploadsDir, { recursive: true });
 
-        const filename = `proofFile-${Date.now()}${path.extname(file.name)}`;
-        const filePath = path.join(uploadsDir, filename);
+        const filePath = path.join(uploadsDir, safeFilename);
         await writeFile(filePath, buffer);
-        finalProofUrl = `/uploads/${filename}`;
+        finalProofUrl = `/uploads/${safeFilename}`;
       }
-    } else if (proofType === "blog") {
-      if (!proofUrl || !proofUrl.trim()) {
-        return Response.json({ message: "Blog content is required for proofType blog." }, { status: 400 });
-      }
-    } else if (proofType === "link") {
-      if (!proofUrl || !/^https?:\/\//.test(proofUrl.trim())) {
-        return Response.json({ message: "Valid link is required for proofType link." }, { status: 400 });
+    } else if (proofType === "blog" || proofType === "link") {
+      if (!finalProofUrl || !/^https?:\/\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+$/i.test(finalProofUrl)) {
+        return Response.json({ message: `Valid http/https URL is required for proofType ${proofType}.` }, { status: 400 });
       }
     }
 

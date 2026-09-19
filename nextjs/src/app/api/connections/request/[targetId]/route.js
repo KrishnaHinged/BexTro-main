@@ -15,10 +15,10 @@ export async function POST(req, { params }) {
 
     if (!targetUser) return Response.json({ message: "Target user not found" }, { status: 404 });
 
-    if (user.connections.includes(targetId)) {
+    if ((user.connections || []).some(id => id.toString() === targetId.toString())) {
       return Response.json({ message: "Already connected" }, { status: 400 });
     }
-    if (user.sentRequests.includes(targetId)) {
+    if ((user.sentRequests || []).some(id => id.toString() === targetId.toString())) {
       return Response.json({ message: "Request already sent" }, { status: 400 });
     }
 

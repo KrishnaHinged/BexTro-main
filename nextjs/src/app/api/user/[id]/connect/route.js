@@ -19,15 +19,18 @@ export async function POST(req, { params }) {
         return Response.json({ message: "User not found" }, { status: 404 });
     }
 
-    if (currentUser.connections.includes(targetUserId)) {
+    const isConnected = (currentUser.connections || []).some(id => id.toString() === targetUserId.toString());
+    if (isConnected) {
         return Response.json({ message: "Already connected" }, { status: 400 });
     }
 
-    if (currentUser.sentRequests.includes(targetUserId)) {
+    const hasSent = (currentUser.sentRequests || []).some(id => id.toString() === targetUserId.toString());
+    if (hasSent) {
         return Response.json({ message: "Request already sent" }, { status: 400 });
     }
 
-    if (currentUser.receivedRequests.includes(targetUserId)) {
+    const hasReceived = (currentUser.receivedRequests || []).some(id => id.toString() === targetUserId.toString());
+    if (hasReceived) {
         return Response.json({ message: "You have a pending request from this user" }, { status: 400 });
     }
 

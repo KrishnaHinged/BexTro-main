@@ -10,11 +10,11 @@ async function canMessageDirectly(senderId, receiverId) {
   
   if (!sender || !receiver) return false;
 
-  const isConnected = sender.connections && sender.connections.includes(receiverId);
+  const isConnected = (sender.connections || []).some(id => id.toString() === receiverId.toString());
   if (isConnected) return true;
 
-  const senderFollowsReceiver = sender.following && sender.following.includes(receiverId);
-  const receiverFollowsSender = receiver.following && receiver.following.includes(senderId);
+  const senderFollowsReceiver = (sender.following || []).some(id => id.toString() === receiverId.toString());
+  const receiverFollowsSender = (receiver.following || []).some(id => id.toString() === senderId.toString());
 
   if (senderFollowsReceiver && receiverFollowsSender) {
     return true;

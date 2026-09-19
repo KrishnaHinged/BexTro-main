@@ -11,20 +11,25 @@ export async function POST(req, { params }) {
     const user = await User.findById(userId);
     const requester = await User.findById(requesterId);
 
-    if (!user.receivedRequests.includes(requesterId)) {
+    const hasRequest = (user.receivedRequests || []).some(id => id.toString() === requesterId.toString());
+    if (!hasRequest) {
       return Response.json({ message: "No pending request from this user" }, { status: 400 });
     }
 
-    user.receivedRequests = user.receivedRequests.filter(id => id.toString() !== requesterId);
-    user.connections.push(requesterId);
+    user.receivedRequests = (user.receivedRequests || []).filter(id => id.toString() !== requesterId.toString());
+    if (!user.connections.some(id => id.toString() === requesterId.toString())) {
+      user.connections.push(requesterId);
+    }
 
-    if (!user.followers.includes(requesterId)) user.followers.push(requesterId);
-    if (!user.following.includes(requesterId)) user.following.push(requesterId);
+    if (!user.followers.some(id => id.toString() === requesterId.toString())) user.followers.push(requesterId);
+    if (!user.following.some(id => id.toString() === requesterId.toString())) user.following.push(requesterId);
 
-    requester.sentRequests = requester.sentRequests.filter(id => id.toString() !== userId);
-    requester.connections.push(userId);
-    if (!requester.followers.includes(userId)) requester.followers.push(userId);
-    if (!requester.following.includes(userId)) requester.following.push(userId);
+    requester.sentRequests = (requester.sentRequests || []).filter(id => id.toString() !== userId.toString());
+    if (!requester.connections.some(id => id.toString() === userId.toString())) {
+      requester.connections.push(userId);
+    }
+    if (!requester.followers.some(id => id.toString() === userId.toString())) requester.followers.push(userId);
+    if (!requester.following.some(id => id.toString() === userId.toString())) requester.following.push(userId);
 
     await user.save();
     await requester.save();

@@ -17,18 +17,18 @@ export async function GET(req, { params }) {
     if (currentUserId) {
         const currentUser = await User.findById(currentUserId);
         if (currentUser) {
-            if (currentUser.connections.includes(userId)) {
+            if ((currentUser.connections || []).some(id => id.toString() === userId.toString())) {
                 connectionStatus = "connected";
-            } else if (currentUser.sentRequests.includes(userId)) {
+            } else if ((currentUser.sentRequests || []).some(id => id.toString() === userId.toString())) {
                 connectionStatus = "pending";
-            } else if (currentUser.receivedRequests.includes(userId)) {
+            } else if ((currentUser.receivedRequests || []).some(id => id.toString() === userId.toString())) {
                 connectionStatus = "received";
             }
         }
     }
 
-    const isFollowing = user.followers.includes(currentUserId);
-    const isConnected = user.connections.includes(currentUserId);
+    const isFollowing = (user.followers || []).some(id => id.toString() === currentUserId.toString());
+    const isConnected = (user.connections || []).some(id => id.toString() === currentUserId.toString());
 
     const isSelf = currentUserId && currentUserId.toString() === userId.toString();
     const shouldHideContent = user.isPrivate && !isConnected && !isSelf;

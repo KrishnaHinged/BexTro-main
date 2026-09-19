@@ -37,16 +37,15 @@ export async function PUT(req) {
 
       const file = formData.get("profilePhoto");
       if (file && typeof file === "object" && file.name) {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        const { validateAndExtractUpload } = await import("@/lib/uploadSecurity");
+        const { safeFilename, buffer } = await validateAndExtractUpload(file, "profilePhoto");
         
         const uploadsDir = path.join(process.cwd(), "public", "uploads");
         await mkdir(uploadsDir, { recursive: true });
 
-        const filename = `profilePhoto-${Date.now()}${path.extname(file.name)}`;
-        const filePath = path.join(uploadsDir, filename);
+        const filePath = path.join(uploadsDir, safeFilename);
         await writeFile(filePath, buffer);
-        profilePhotoPath = `/uploads/${filename}`;
+        profilePhotoPath = `/uploads/${safeFilename}`;
       }
     } else {
       const body = await req.json();
@@ -74,7 +73,7 @@ export async function PUT(req) {
       updateData.profilePhoto = profilePhotoPath;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-password");
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { returnDocument: 'after' }).select("-password");
 
     return Response.json({
       message: "Profile updated successfully!",
@@ -82,7 +81,8 @@ export async function PUT(req) {
     }, { status: 200 });
 
   } catch (error) {
-    console.error("Update Profile Route Error:", error);
-    return Response.json({ message: error.message || "Server Error" }, { status: 500 });
+    const isAuth = error.message?.includes("token");
+    if (!isAuth) console.error("Update Profile Route Error:", error);
+    return Response.json({ message: error.message || "Server Error" }, { status: isAuth ? 401 : 500 });
   }
 }

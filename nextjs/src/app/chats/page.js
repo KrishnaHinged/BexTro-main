@@ -8,14 +8,8 @@ import MessageContainer from "@/components/features/chats/messageContainer";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 
 export default function ChatPage() {
-    const [step, setStep] = useState(1);
     const [isMobile, setIsMobile] = useState(false);
     const [showChatList, setShowChatList] = useState(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setStep(2), 3000);
-        return () => clearTimeout(timer);
-    }, []);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -34,12 +28,9 @@ export default function ChatPage() {
     return (
         <ErrorBoundary>
             <div className="flex min-h-screen bg-cream text-charcoal font-sans-clean">
-                {step === 1 ? (
-                    <PageLoader message="Chats..." />
-                ) : (
-                    <div className="flex w-full">
-                        <MainSlideBar />
-                        <div className="flex-1 p-6 md:p-10 overflow-y-auto">
+                <div className="flex w-full">
+                    <MainSlideBar />
+                    <div className="flex-1 p-6 md:p-10 overflow-y-auto">
                             <div className="flex items-center justify-between mb-8">
                                 <h1 className="text-3xl md:text-5xl font-serif-elegant font-normal text-charcoal tracking-tight">
                                     Chats<span className="text-indigo-600">.</span>
@@ -65,7 +56,6 @@ export default function ChatPage() {
                             </div>
                         </div>
                     </div>
-                )}
             </div>
         </ErrorBoundary>
     );

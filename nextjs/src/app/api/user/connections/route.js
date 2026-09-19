@@ -1,6 +1,6 @@
 import connectDB from "@/lib/db";
 import { User } from "@/models/userModel";
-import { verifyAuth } from "@/lib/auth";
+import { verifyAuth, handleApiError } from "@/lib/auth";
 
 export async function GET(req) {
   try {
@@ -19,7 +19,6 @@ export async function GET(req) {
     return Response.json(connections, { status: 200 });
 
   } catch (error) {
-    console.error("Get Connections Error:", error);
-    return Response.json({ message: "Server Error", error: error.message }, { status: 500 });
+    return handleApiError(error, "Get Connections");
   }
 }

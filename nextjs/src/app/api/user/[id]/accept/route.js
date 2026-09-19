@@ -15,15 +15,20 @@ export async function POST(req, { params }) {
         return Response.json({ message: "User not found" }, { status: 404 });
     }
 
-    if (!currentUser.receivedRequests.includes(targetUserId)) {
+    const hasRequest = (currentUser.receivedRequests || []).some(id => id.toString() === targetUserId.toString());
+    if (!hasRequest) {
         return Response.json({ message: "No pending request from this user" }, { status: 400 });
     }
 
-    currentUser.receivedRequests = currentUser.receivedRequests.filter(id => id.toString() !== targetUserId);
-    targetUser.sentRequests = targetUser.sentRequests.filter(id => id.toString() !== currentUserId);
+    currentUser.receivedRequests = (currentUser.receivedRequests || []).filter(id => id.toString() !== targetUserId.toString());
+    targetUser.sentRequests = (targetUser.sentRequests || []).filter(id => id.toString() !== currentUserId.toString());
 
-    currentUser.connections.push(targetUserId);
-    targetUser.connections.push(currentUserId);
+    if (!currentUser.connections.some(id => id.toString() === targetUserId.toString())) {
+      currentUser.connections.push(targetUserId);
+    }
+    if (!targetUser.connections.some(id => id.toString() === currentUserId.toString())) {
+      targetUser.connections.push(currentUserId);
+    }
 
     await currentUser.save();
     await targetUser.save();

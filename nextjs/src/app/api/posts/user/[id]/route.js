@@ -14,7 +14,7 @@ export async function GET(req, { params }) {
 
     const posts = await Post.find({ user: userId })
         .sort({ createdAt: -1 })
-        .populate("user", "fullName username profilePhoto following");
+        .populate("user", "fullName username profilePhoto following isPrivate");
 
     const postsWithStatus = posts.map(post => {
         const p = post.toObject();

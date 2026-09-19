@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { FaHeart, FaComment, FaUserPlus, FaEnvelope, FaUsers } from "react-icons/fa";
 
 export default function NotificationsPage() {
-    const [step, setStep] = useState(1);
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const { socket } = useSelector(store => store.socket);
@@ -28,7 +27,6 @@ export default function NotificationsPage() {
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => setStep(2), 1500);
         fetchNotifications();
 
         if (socket) {
@@ -37,8 +35,6 @@ export default function NotificationsPage() {
             });
             return () => socket.off("newNotification");
         }
-
-        return () => clearTimeout(timer);
     }, [socket]);
 
     const markAsRead = async () => {
@@ -94,11 +90,8 @@ export default function NotificationsPage() {
 
     return (
         <div className="flex min-h-screen bg-cream text-charcoal font-sans-clean">
-            {step === 1 && <PageLoader message="Notifications..." />}
-            {step === 2 && (
-                <>
-                    <MainSlideBar />
-                    <div className="flex-1 p-6 md:p-10 overflow-y-auto">
+            <MainSlideBar />
+            <div className="flex-1 p-6 md:p-10 overflow-y-auto">
                         <div className="flex items-center justify-between mb-8">
                             <h1 className="text-3xl md:text-5xl font-serif-elegant font-normal text-charcoal tracking-tight">
                                 Notifications<span className="text-indigo-600">.</span>
@@ -183,8 +176,6 @@ export default function NotificationsPage() {
                             </div>
                         )}
                     </div>
-                </>
-            )}
         </div>
     );
 }

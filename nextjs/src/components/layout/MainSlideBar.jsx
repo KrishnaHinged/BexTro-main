@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import { FaHome, FaCog, FaGlobe, FaUsers, FaBell } from "react-icons/fa";
+import { FaHome, FaCog, FaGlobe, FaUsers, FaBell, FaBullseye, FaBrain } from "react-icons/fa";
 import NotificationTray from "../features/notifications/NotificationTray";
 
 export default function MainSlideBar() {
@@ -12,7 +12,6 @@ export default function MainSlideBar() {
   const pathname = usePathname();
   const { authUser } = useSelector(store => store.user);
   const { socket } = useSelector(store => store.socket);
-  const [active, setActive] = useState("dashboard");
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -33,20 +32,17 @@ export default function MainSlideBar() {
     { id: "communities", label: "Communities", icon: <FaUsers size={20} />, path: "/communities" },
   ];
 
-  useEffect(() => {
-    const currentPath = pathname || "";
-    const activeItem = menuItems.find((item) => item.path === currentPath || (item.path !== "/dashboard" && currentPath.startsWith(item.path)));
-
-    if (activeItem) {
-      setActive(activeItem.id);
-    } else if (currentPath.startsWith("/user/")) {
-      setActive("feed");
-    } else if (currentPath === "/profile") {
-      setActive("profile");
-    } else if (currentPath === "/settings") {
-      setActive("settings");
-    }
-  }, [pathname]);
+  const currentPath = pathname || "";
+  const activeItem = menuItems.find((item) => item.path === currentPath || (item.path !== "/dashboard" && currentPath.startsWith(item.path)));
+  const active = activeItem 
+    ? activeItem.id 
+    : currentPath.startsWith("/user/") 
+      ? "feed" 
+      : currentPath === "/profile" 
+        ? "profile" 
+        : currentPath === "/settings" 
+          ? "settings" 
+          : "dashboard";
 
 
   const profilePhotoUrl = authUser?.profilePhoto || `https://ui-avatars.com/api/?name=${authUser?.username || "User"}`;
@@ -67,7 +63,6 @@ export default function MainSlideBar() {
             <button
               key={id}
               onClick={() => {
-                setActive(id);
                 setShowNotifications(false);
                 router.push(path);
               }}
@@ -137,7 +132,6 @@ export default function MainSlideBar() {
           {/* PROFILE PHOTO */}
           <div
             onClick={() => {
-              setActive("profile");
               router.push("/profile");
             }}
             className="relative cursor-pointer group"

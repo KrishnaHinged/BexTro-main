@@ -114,11 +114,11 @@ export default function GoalDetailPage() {
         "At Risk": "bg-rose-50 text-rose-700 border-rose-200"
     };
 
-    const completedMilestones = goal.milestones?.filter(m => m.status === "completed") || [];
-    const pendingMilestones = goal.milestones?.filter(m => m.status !== "completed") || [];
+    const completedMilestones = goal.milestones?.filter(m => m.completed || m.status === "completed") || [];
+    const pendingMilestones = goal.milestones?.filter(m => !m.completed && m.status !== "completed") || [];
     const nextMountain = pendingMilestones[0];
     
-    const milestonesWithProof = goal.milestones?.filter(m => m.status === "completed" && m.proof?.proofUrl) || [];
+    const milestonesWithProof = goal.milestones?.filter(m => (m.completed || m.status === "completed") && (m.proofUrl || m.proof?.proofUrl)) || [];
     const completedTasksWithProof = tasks.filter(t => t.status === "completed" && (t.completionProof?.proofText || t.reflectionNote));
 
     return (
@@ -289,7 +289,9 @@ export default function GoalDetailPage() {
 
                     <div className="space-y-3">
                         {goal.milestones?.map((milestone, idx) => {
-                            const isDone = milestone.status === "completed";
+                            const isDone = milestone.completed || milestone.status === "completed";
+                            const proofUrl = milestone.proofUrl || milestone.proof?.proofUrl;
+                            const proofType = milestone.proofType || milestone.proof?.proofType || "image";
 
                             return (
                                 <div
@@ -326,18 +328,18 @@ export default function GoalDetailPage() {
                                                 </span>
                                             )}
 
-                                            {milestone.proof?.proofUrl && (
+                                            {proofUrl && (
                                                 <div className="pt-2 flex items-center gap-2">
-                                                    {milestone.proof.proofType === "image" && (
+                                                    {proofType === "image" && (
                                                         <img 
-                                                            src={milestone.proof.proofUrl.startsWith("http") ? milestone.proof.proofUrl : `${ROOT_URL}${milestone.proof.proofUrl}`}
+                                                            src={proofUrl.startsWith("http") ? proofUrl : `${ROOT_URL}${proofUrl}`}
                                                             alt="Proof"
                                                             className="w-12 h-12 object-cover rounded-lg border border-cream-dark shadow-xs"
                                                         />
                                                     )}
-                                                    {milestone.proof.proofType === "link" && (
+                                                    {proofType === "link" && (
                                                         <a 
-                                                            href={milestone.proof.proofUrl}
+                                                            href={proofUrl}
                                                             target="_blank"
                                                             rel="noreferrer"
                                                             className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"

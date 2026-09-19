@@ -16,12 +16,16 @@ export async function GET(req) {
     if (!user) return Response.json({ message: "User not found" }, { status: 404 });
 
     let posts = [];
-    if (tab === "following") {
-      const followingIds = user.following || [];
+    if (tab === "following" || tab === "connections") {
+      const followingIds = (user.following || []).map(id => id.toString());
+      const connectionIds = (user.connections || []).map(c => (c?.user || c).toString());
+      const combinedIds = [...new Set([...followingIds, ...connectionIds, userId.toString()])];
+
       posts = await Post.find({
-        user: { $in: [...followingIds, userId] },
+        user: { $in: combinedIds },
         $or: [
           { visibility: "public" },
+          { visibility: "connections" },
           { user: userId }
         ]
       })
@@ -55,9 +59,9 @@ export async function GET(req) {
         const mockPosts = finalChallenges.map(ch => ({
           _id: ch._id,
           challengeText: ch.text,
-          description: ch.difficulty + " Challenge: " + (ch.objective || ""),
-          proofType: "link",
-          proofUrl: "/challenges",
+          description: (ch.difficulty ? `${ch.difficulty.charAt(0).toUpperCase() + ch.difficulty.slice(1)} • ` : "") + (ch.objective || ch.motivation || "Tackle this challenge to build your streak."),
+          proofType: "challenge",
+          proofUrl: "",
           isChallengeDiscovery: true,
           user: {
             _id: "000000000000000000000000",
@@ -131,7 +135,7 @@ export async function GET(req) {
     return Response.json(postsWithStatus, { status: 200 });
 
   } catch (error) {
-    console.error("Get Feed Route Error:", error);
-    return Response.json({ message: "Server Error", error: error.message }, { status: 500 });
+    const { handleApiError } = await import("@/lib/auth");
+    return handleApiError(error, "Get Feed Route");
   }
 }

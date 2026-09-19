@@ -6,11 +6,11 @@ import axiosInstance from "@/api/axios";
 import { toast } from "react-hot-toast";
 import { FaCheck, FaFire, FaBolt } from "react-icons/fa";
 
-const ReflectionModal = ({ task, actualMinutes, onClose, onCompleted }) => {
+const ReflectionModal = ({ task, actualMinutes, initialNotes = "", onClose, onCompleted }) => {
     const [whatAccomplished, setWhatAccomplished] = useState(task?.title || "");
     const [difficultyRating, setDifficultyRating] = useState(3);
     const [movedCloserToGoal, setMovedCloserToGoal] = useState(true);
-    const [reflectionNote, setReflectionNote] = useState("");
+    const [reflectionNote, setReflectionNote] = useState(initialNotes || "");
     const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {

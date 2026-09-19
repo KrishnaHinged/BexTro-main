@@ -3,29 +3,47 @@ import { User } from "@/models/userModel";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { rateLimit } from "@/lib/rateLimiter";
 
 export async function POST(req) {
   try {
-    await connectDB();
-    const { username, password } = await req.json();
-
-    if (!username || !password) {
-      return Response.json({ message: "All fields are required" }, { status: 400 });
+    // Rate limit login attempts: 5 per minute per IP
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    const limitCheck = rateLimit(`login:${ip}`, 5, 60000);
+    if (!limitCheck.success) {
+      return Response.json(
+        { message: `Too many login attempts. Please wait ${limitCheck.retryAfter} seconds.` },
+        { status: 429 }
+      );
     }
 
-    const user = await User.findOne({ username: username.trim() });
+    await connectDB();
+    const body = await req.json();
+    const username = typeof body?.username === "string" ? body.username.trim() : "";
+    const password = typeof body?.password === "string" ? body.password : "";
+
+    if (!username || !password) {
+      return Response.json({ message: "Username and password are required" }, { status: 400 });
+    }
+
+    const user = await User.findOne({ username }).select("+password");
     if (!user) {
       return Response.json({ message: "Invalid credentials" }, { status: 400 });
     }
 
-    const isMatch = await bcrypt.compare(password.trim(), user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return Response.json({ message: "Invalid credentials" }, { status: 400 });
     }
 
+    const secret = process.env.JWT_SECRET_KEY || process.env.JWT_SECRET;
+    if (!secret) {
+      throw new Error("Server security error: JWT_SECRET is not configured");
+    }
+
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET_KEY || process.env.JWT_SECRET || "hello_secret",
+      secret,
       { expiresIn: "1d" }
     );
 

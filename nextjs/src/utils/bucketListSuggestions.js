@@ -10,7 +10,7 @@
 export const BUCKET_LIST_CATEGORIES = {
   coding: {
     label: "Coding & Tech",
-    icon: "💻",
+    iconName: "Code2",
     suggestions: [
       "Build and launch a full-stack SaaS project",
       "Contribute code to a major open-source library",
@@ -24,7 +24,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   art: {
     label: "Art & Design",
-    icon: "🎨",
+    iconName: "Palette",
     suggestions: [
       "Fill an entire 100-page sketchbook from front to back",
       "Host a solo art exhibition or gallery showcase",
@@ -38,7 +38,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   music: {
     label: "Music & Audio",
-    icon: "🎵",
+    iconName: "Music",
     suggestions: [
       "Learn to play guitar or piano fluently by ear",
       "Compose, produce, and release an original song on Spotify",
@@ -52,7 +52,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   sports: {
     label: "Sports & Athletics",
-    icon: "⚽",
+    iconName: "Trophy",
     suggestions: [
       "Train for and finish a full marathon (42.2 km)",
       "Reach peak athletic shape & sub-12% body fat",
@@ -66,7 +66,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   travel: {
     label: "Travel & Adventure",
-    icon: "✈️",
+    iconName: "Compass",
     suggestions: [
       "Witness the Northern Lights (Aurora Borealis) in person",
       "Solo backpack across a foreign continent for 30 days",
@@ -80,7 +80,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   fitness: {
     label: "Fitness & Strength",
-    icon: "💪",
+    iconName: "Dumbbell",
     suggestions: [
       "Hit the 1000lb barbell club (Deadlift + Squat + Bench)",
       "Do 100 consecutive strict pushups without resting",
@@ -91,7 +91,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   writing: {
     label: "Writing & Literature",
-    icon: "✍️",
+    iconName: "PenTool",
     suggestions: [
       "Write and publish a 50,000-word book or novel",
       "Maintain an unbroken daily reflection journal for 365 days",
@@ -102,7 +102,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   finance: {
     label: "Finance & Wealth",
-    icon: "📈",
+    iconName: "TrendingUp",
     suggestions: [
       "Earn your first $10,000 completely independently",
       "Achieve full debt-free status and 6-month emergency fund",
@@ -113,7 +113,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   mindfulness: {
     label: "Mindset & Lifestyle",
-    icon: "🧘",
+    iconName: "Brain",
     suggestions: [
       "Complete a 10-day silent Vipassana meditation retreat",
       "Maintain a 100-day waking up at 5:30 AM routine",
@@ -124,7 +124,7 @@ export const BUCKET_LIST_CATEGORIES = {
   },
   universal: {
     label: "Universal Growth",
-    icon: "🌟",
+    iconName: "Target",
     suggestions: [
       "Give a keynote speech to an audience of 200+ people",
       "Cook a restaurant-grade 5-course meal for friends & family",
@@ -209,7 +209,7 @@ export function getSuggestionsForInterests(userInterests = []) {
       result.push({
         categoryKey: catKey,
         categoryLabel: cat.label,
-        icon: cat.icon,
+        iconName: cat.iconName,
         items: cat.suggestions
       });
     }

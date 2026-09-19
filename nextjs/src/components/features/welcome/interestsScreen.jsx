@@ -6,6 +6,8 @@ import axiosInstance from "@/api/axios";
 import BucketList from "../welcome/BucketList";
 import { toast } from "react-hot-toast";
 
+import { X, ArrowRight } from "lucide-react";
+
 export default function InterestsScreen({ nextScreen }) {
     const [selectedInterests, setSelectedInterests] = useState(new Set());
     const [customInterest, setCustomInterest] = useState("");
@@ -107,13 +109,13 @@ export default function InterestsScreen({ nextScreen }) {
                                     >
                                         {custom}
                                         <button
-                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full w-5 h-5 flex items-center justify-center text-[8px] border border-white/20 cursor-pointer"
+                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full w-5 h-5 flex items-center justify-center border border-white/20 cursor-pointer"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleInterestClick(custom);
                                             }}
                                         >
-                                            ❌
+                                            <X className="w-2.5 h-2.5" />
                                         </button>
                                     </motion.div>
                                 ))}
@@ -138,9 +140,10 @@ export default function InterestsScreen({ nextScreen }) {
 
                     <button
                         onClick={() => setShowBucketList(true)}
-                        className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-sm font-semibold shadow-lg hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+                        className="group inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full text-sm font-semibold shadow-lg hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                     >
-                        Continue to Bucket List 🚀
+                        <span>Continue to Bucket List</span>
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                     </button>
                 </div>
             ) : (

@@ -1,6 +1,6 @@
 import connectDB from "@/lib/db";
 import { Notification } from "@/models/Notification";
-import { verifyAuth } from "@/lib/auth";
+import { verifyAuth, handleApiError } from "@/lib/auth";
 
 export async function PUT(req) {
   try {
@@ -11,7 +11,6 @@ export async function PUT(req) {
 
     return Response.json({ message: "Notifications marked as read", success: true }, { status: 200 });
   } catch (error) {
-    console.error("Mark notifications read Error:", error);
-    return Response.json({ message: "Server Error", error: error.message }, { status: 500 });
+    return handleApiError(error, "Mark notifications read");
   }
 }

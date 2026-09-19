@@ -7,6 +7,49 @@ import { useDispatch } from "react-redux";
 import { logoutUser } from "@/redux/userSlice";
 import axiosInstance from "@/api/axios";
 import { getSuggestionsForInterests } from "@/utils/bucketListSuggestions";
+import {
+  Sparkles,
+  Code2,
+  Palette,
+  Music,
+  Trophy,
+  Compass,
+  Dumbbell,
+  PenTool,
+  TrendingUp,
+  Brain,
+  Target,
+  Plus,
+  Check,
+  Trash2,
+  Layers
+} from "lucide-react";
+
+function CategoryIcon({ name, className = "w-3.5 h-3.5" }) {
+  switch (name) {
+    case "Code2":
+      return <Code2 className={className} />;
+    case "Palette":
+      return <Palette className={className} />;
+    case "Music":
+      return <Music className={className} />;
+    case "Trophy":
+      return <Trophy className={className} />;
+    case "Compass":
+      return <Compass className={className} />;
+    case "Dumbbell":
+      return <Dumbbell className={className} />;
+    case "PenTool":
+      return <PenTool className={className} />;
+    case "TrendingUp":
+      return <TrendingUp className={className} />;
+    case "Brain":
+      return <Brain className={className} />;
+    case "Target":
+    default:
+      return <Target className={className} />;
+  }
+}
 
 export default function BucketListTab() {
   const [bucketList, setBucketList] = useState([]);
@@ -60,7 +103,7 @@ export default function BucketListTab() {
           allItems.push({
             text: itemText,
             categoryLabel: cat.categoryLabel,
-            icon: cat.icon
+            iconName: cat.iconName
           });
         });
       });
@@ -70,7 +113,7 @@ export default function BucketListTab() {
     return (found?.items || []).map((itemText) => ({
       text: itemText,
       categoryLabel: found.categoryLabel,
-      icon: found.icon
+      iconName: found.iconName
     }));
   }, [suggestedCategories, activeCategory]);
 
@@ -80,7 +123,7 @@ export default function BucketListTab() {
       return toast.error("Item cannot be empty!");
     }
     if (existingTexts.has(trimmedItem.toLowerCase())) {
-      return toast("This item is already in your bucket list!", { icon: "ℹ️" });
+      return toast("This item is already in your bucket list!");
     }
 
     setIsSubmitting(true);
@@ -91,7 +134,7 @@ export default function BucketListTab() {
       });
       setBucketList(response.data.data || [...bucketList, { text: trimmedItem, achieved: false }]);
       if (textToAdd === newItem) setNewItem("");
-      toast.success(response.data.message || "Item added to bucket list! 🎯");
+      toast.success(response.data.message || "Item added to bucket list!");
     } catch (error) {
       console.error("Add Bucket List Item Error:", error);
       toast.error(error.response?.data?.error || "Failed to add item!");
@@ -167,7 +210,7 @@ export default function BucketListTab() {
         <div className="mb-6 p-4 bg-cream-card/70 border border-cream-dark/80 rounded-2xl">
           <div className="flex items-center justify-between gap-2 mb-2.5">
             <div className="flex items-center gap-1.5">
-              <span className="text-sm">✨</span>
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
               <span className="text-xs font-semibold text-charcoal/80 uppercase tracking-wide">
                 Suggested Goals (From Your Interests)
               </span>
@@ -179,13 +222,14 @@ export default function BucketListTab() {
               <button
                 type="button"
                 onClick={() => setActiveCategory("all")}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer ${
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
                   activeCategory === "all"
                     ? "bg-charcoal text-white"
                     : "bg-cream-dark/30 text-charcoal/60 hover:bg-cream-dark/50"
                 }`}
               >
-                All
+                <Layers className="w-3 h-3" />
+                <span>All</span>
               </button>
               {suggestedCategories.map((cat) => (
                 <button
@@ -198,7 +242,7 @@ export default function BucketListTab() {
                       : "bg-cream-dark/30 text-charcoal/60 hover:bg-cream-dark/50"
                   }`}
                 >
-                  <span>{cat.icon}</span>
+                  <CategoryIcon name={cat.iconName} className="w-3 h-3" />
                   <span>{cat.categoryLabel}</span>
                 </button>
               ))}
@@ -213,18 +257,28 @@ export default function BucketListTab() {
                   key={`${sug.text}-${idx}`}
                   disabled={isAdded || isSubmitting}
                   onClick={() => handleAddCustomOrSuggested(sug.text)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border text-left flex items-center gap-1.5 transition cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border text-left flex items-center gap-2 transition cursor-pointer ${
                     isAdded
                       ? "bg-emerald-50 border-emerald-200 text-emerald-800 cursor-default opacity-80"
                       : "bg-white border-cream-dark/80 text-charcoal/80 hover:border-indigo-400 hover:bg-indigo-50/20"
                   }`}
                 >
-                  <span>{sug.icon}</span>
+                  <CategoryIcon name={sug.iconName} className="w-3.5 h-3.5 text-charcoal/60 flex-shrink-0" />
                   <span className="truncate max-w-[220px]">{sug.text}</span>
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 ${
                     isAdded ? "bg-emerald-100 text-emerald-700" : "bg-charcoal/5 text-charcoal/60"
                   }`}>
-                    {isAdded ? "✓ Added" : "+ Add"}
+                    {isAdded ? (
+                      <>
+                        <Check className="w-2.5 h-2.5 text-emerald-600" />
+                        <span>Added</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-2.5 h-2.5 text-charcoal/50" />
+                        <span>Add</span>
+                      </>
+                    )}
                   </span>
                 </button>
               );
@@ -253,10 +307,10 @@ export default function BucketListTab() {
             </div>
             <button
               onClick={() => handleRemoveItem(entry.text)}
-              className="text-rose-400 hover:text-rose-600 text-sm cursor-pointer p-1 transition-colors bg-transparent border-none outline-none"
+              className="text-charcoal/30 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 cursor-pointer transition-colors bg-transparent border-none outline-none"
               title="Remove item"
             >
-              ✕
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
@@ -269,4 +323,5 @@ export default function BucketListTab() {
     </div>
   );
 }
+
 

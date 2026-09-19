@@ -1,0 +1,160 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trophy, Zap, Leaf, Baby, Flame, Rocket } from "lucide-react";
+
+export default function Score({ score = 0 }) {
+    const [level, setLevel] = useState(1);
+    const [isCelebrating, setIsCelebrating] = useState(false);
+    const pointsPerLevel = 100;
+    const maxScore = 500;
+
+    useEffect(() => {
+        const newLevel = Math.floor(score / pointsPerLevel) + 1;
+        if (newLevel > level) {
+            setIsCelebrating(true);
+            setTimeout(() => setIsCelebrating(false), 2000);
+        }
+        setLevel(newLevel);
+    }, [score]);
+
+    const getLevelBadge = () => {
+        if (level >= 10) return {
+            label: "Legend",
+            color: "bg-gradient-to-br from-yellow-300 to-amber-500",
+            glow: "shadow-[0_0_20px_rgba(234,179,8,0.6)]",
+            Icon: Trophy,
+            CelebrationIcon: Flame,
+        };
+        if (level >= 5) return {
+            label: "Pro",
+            color: "bg-gradient-to-br from-blue-400 to-indigo-600",
+            glow: "shadow-[0_0_15px_rgba(96,165,250,0.5)]",
+            Icon: Zap,
+            CelebrationIcon: Rocket,
+        };
+        return {
+            label: "Newbie",
+            color: "bg-gradient-to-br from-green-400 to-emerald-600",
+            glow: "shadow-[0_0_10px_rgba(74,222,128,0.4)]",
+            Icon: Leaf,
+            CelebrationIcon: Baby,
+        };
+    };
+
+    const badge = getLevelBadge();
+    const { Icon, CelebrationIcon } = badge;
+    const pointsToNextLevel = pointsPerLevel - (score % pointsPerLevel);
+    const progressPercentage = Math.min((score / maxScore) * 100, 100);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+            className="p-6 bg-gray-900/80 rounded-2xl border border-gray-900 shadow-2xl relative overflow-hidden max-w-md mx-auto"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+        >
+            {/* Level Badge */}
+            <motion.div className="flex items-center justify-center mb-6" whileHover={{ y: -3 }}>
+                <motion.div
+                    key={level}
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                    className={`w-16 h-16 rounded-full ${badge.color} ${badge.glow} flex items-center justify-center mr-4`}
+                >
+                    <Icon size={28} color="white" strokeWidth={1.8} />
+                </motion.div>
+                <div>
+                    <p className="text-xs text-gray-400 mb-1">LEVEL</p>
+                    <motion.h2
+                        className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500"
+                        animate={{ scale: [1, 1.05, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                        {badge.label}
+                    </motion.h2>
+                </div>
+            </motion.div>
+
+            {/* Score Display */}
+            <div className="text-center mb-8">
+                <p className="text-sm text-gray-400 mb-2">YOUR SCORE</p>
+                <motion.p
+                    className="text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 mb-2"
+                    whileHover={{ scale: 1.05 }}
+                >
+                    {score}
+                </motion.p>
+                <motion.p
+                    className="text-sm text-gray-400"
+                    animate={{ opacity: [0.6, 1, 0.6] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                >
+                    {pointsToNextLevel} points to level up!
+                </motion.p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="relative">
+                <div className="h-3 bg-gray-800 rounded-full overflow-hidden mb-2">
+                    <motion.div
+                        className={`h-full rounded-full ${badge.color}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPercentage}%` }}
+                        transition={{ duration: 1.5, ease: [0.6, 0.01, 0.05, 0.95] }}
+                    />
+                </div>
+                <div className="flex justify-between text-xs text-gray-400">
+                    <span>0</span>
+                    <span>{maxScore}</span>
+                </div>
+            </div>
+
+            {/* Celebration Elements */}
+            <AnimatePresence>
+                {isCelebrating && (
+                    <>
+                        {/* Confetti */}
+                        {[...Array(30)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                className="absolute rounded-full w-2 h-2"
+                                style={{
+                                    left: `${Math.random() * 100}%`,
+                                    bottom: "0%",
+                                    background: ["#f43f5e", "#3b82f6", "#f59e0b", "#10b981"][Math.floor(Math.random() * 4)],
+                                }}
+                                initial={{ y: 0, opacity: 1, rotate: 0 }}
+                                animate={{
+                                    y: -500,
+                                    opacity: 0,
+                                    rotate: 360,
+                                    x: Math.random() > 0.5 ? 50 : -50,
+                                }}
+                                transition={{
+                                    duration: 1.5,
+                                    ease: "circOut",
+                                    delay: Math.random() * 0.5,
+                                }}
+                            />
+                        ))}
+
+                        {/* Trophy Icon */}
+                        <motion.div
+                            className="absolute -top-8 -right-8"
+                            initial={{ scale: 0, rotate: -30 }}
+                            animate={{ scale: 1, rotate: [0, 25, -25, 0], y: [0, -20, 0] }}
+                            transition={{ duration: 1.5 }}
+                        >
+                            <CelebrationIcon size={36} color="#facc15" strokeWidth={1.5} />
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </motion.div>
+    );
+}

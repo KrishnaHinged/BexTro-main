@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+
+
+:root {
+  --background: #FAF8EE;
+  --foreground: #1C1E1C;
+}
+
+.font-serif-elegant {
+  font-family: 'Playfair Display', serif, Georgia;
+}
+
+.font-sans-clean {
+  font-family: 'Outfit', sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.bg-cream {
+  background-color: #FAF8EE !important;
+}
+
+.bg-cream-card {
+  background-color: #FCF9F2 !important;
+}
+
+.bg-dark-green {
+  background-color: #1E2522 !important;
+}
+
+.text-dark-green {
+  color: #1E2522 !important;
+}
+
+.bg-dark-green-card {
+  background-color: #27302C !important;
+}
+
+.text-charcoal {
+  color: #1C1E1C !important;
+}
+
+.bg-charcoal {
+  background-color: #1C1E1C !important;
+}
+
+.text-sand {
+  color: #EAE7E0 !important;
+}
+
+.bg-sand {
+  background-color: #EAE7E0 !important;
+}
+
+.border-cream-dark {
+  border-color: #E6E2D3 !important;
+}
+
+.custom-gradient {
+  background: linear-gradient(85deg, #8ec5fc 0%, #e0c3fc 100%);
+}
+
+.moving-text {
+  overflow-x: hidden;
+  white-space: nowrap;
+  display: flex;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.moving-text::-webkit-scrollbar {
+  display: none;
+}
+
+.con {
+  white-space: nowrap;
+  display: inline-block;
+  animation-name: move;
+  animation-duration: 10s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.moving-text h1 {
+  display: inline-block;
+}
+
+.gola {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  display: inline-block;
+  background-color: #FE320A;
+  margin: 1vh 1vw;
+}
+
+@keyframes move {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.logo-glow {
+  filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8));
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+
+.logo-glow:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0px 0px 15px rgba(255, 255, 255, 1));
+}
+
+.gooey {
+  animation-name: gooey;
+  animation-duration: 6s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes gooey {
+  from {
+    transform: translate(10%, -10%) skew(0);
+  }
+  to {
+    transform: translate(-10%, 10%) skew(-25deg);
+  }
+}
+

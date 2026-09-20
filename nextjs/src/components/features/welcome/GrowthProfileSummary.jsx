@@ -109,7 +109,7 @@ const GrowthProfileSummary = ({ profile, onProceedToDashboard }) => {
 
                     {profile.motivationReason && (
                         <div className="text-xs text-charcoal/70 bg-indigo-50/40 p-3 rounded-2xl border border-indigo-100/60 italic font-serif-elegant">
-                            "{profile.motivationReason}"
+                            &quot;{profile.motivationReason}&quot;
                         </div>
                     )}
                 </div>

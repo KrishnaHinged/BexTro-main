@@ -115,22 +115,34 @@ export default function BucketList({ userInterests: propInterests }) {
 
   // If interests weren't passed as prop, load from user's profile
   useEffect(() => {
+    let isCancelled = false;
     if (!propInterests || propInterests.length === 0) {
       axiosInstance
         .get("/userdata/interests")
         .then((res) => {
-          const loaded = res.data?.interests || [];
-          setInterests(loaded);
-          fetchAISuggestions(loaded);
+          if (!isCancelled) {
+            const loaded = res.data?.interests || [];
+            setInterests(loaded);
+            fetchAISuggestions(loaded);
+          }
         })
         .catch((err) => {
-          console.error("Error fetching user interests:", err);
-          fetchAISuggestions([]);
+          if (!isCancelled) {
+            console.error("Error fetching user interests:", err);
+            fetchAISuggestions([]);
+          }
         });
     } else {
-      setInterests(propInterests);
-      fetchAISuggestions(propInterests);
+      (async () => {
+        await Promise.resolve();
+        if (!isCancelled) {
+          fetchAISuggestions(propInterests);
+        }
+      })();
     }
+    return () => {
+      isCancelled = true;
+    };
   }, [propInterests]);
 
   const existingTexts = useMemo(() => {

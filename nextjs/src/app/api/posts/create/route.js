@@ -20,9 +20,13 @@ export async function POST(req) {
     const description = formData.get("description");
     const visibility = formData.get("visibility") || "public";
 
-    if (!challengeText || !proofType || !timelineTaken) {
-      return Response.json({ message: "Missing required fields: challengeText/proofType/timelineTaken." }, { status: 400 });
+    if (!challengeText || !proofType) {
+      return Response.json({ message: "Missing required fields: challengeText and proofType." }, { status: 400 });
     }
+
+    const timelineDaysNum = timelineTaken && !isNaN(Number(timelineTaken)) && Number(timelineTaken) > 0 
+      ? Number(timelineTaken) 
+      : 1;
 
     const allowedTypes = ["image", "video", "blog", "link"];
     if (!allowedTypes.includes(proofType)) {
@@ -41,23 +45,31 @@ export async function POST(req) {
 
     const file = formData.get("proofFile");
     if (proofType === "image" || proofType === "video") {
-      if (!file && !proofUrl) {
+      if (!file && !finalProofUrl) {
         return Response.json({ message: "Proof file is required for image and video types." }, { status: 400 });
       }
-      if (file && typeof file === "object" && file.name) {
-        const { validateAndExtractUpload } = await import("@/lib/uploadSecurity");
-        const { safeFilename, buffer } = await validateAndExtractUpload(file, "proofFile");
+      if (file && typeof file === "object" && file.name && file.size > 0) {
+        try {
+          const { validateAndExtractUpload } = await import("@/lib/uploadSecurity");
+          const { safeFilename, buffer } = await validateAndExtractUpload(file, "proofFile");
 
-        const uploadsDir = path.join(process.cwd(), "public", "uploads");
-        await mkdir(uploadsDir, { recursive: true });
+          const uploadsDir = path.join(process.cwd(), "public", "uploads");
+          await mkdir(uploadsDir, { recursive: true });
 
-        const filePath = path.join(uploadsDir, safeFilename);
-        await writeFile(filePath, buffer);
-        finalProofUrl = `/uploads/${safeFilename}`;
+          const filePath = path.join(uploadsDir, safeFilename);
+          await writeFile(filePath, buffer);
+          finalProofUrl = `/uploads/${safeFilename}`;
+        } catch (uploadErr) {
+          return Response.json({ message: uploadErr.message || "Invalid upload file." }, { status: 400 });
+        }
       }
-    } else if (proofType === "blog" || proofType === "link") {
+    } else if (proofType === "blog") {
+      if (!finalProofUrl || !finalProofUrl.trim()) {
+        return Response.json({ message: "Blog content or link is required." }, { status: 400 });
+      }
+    } else if (proofType === "link") {
       if (!finalProofUrl || !/^https?:\/\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+$/i.test(finalProofUrl)) {
-        return Response.json({ message: `Valid http/https URL is required for proofType ${proofType}.` }, { status: 400 });
+        return Response.json({ message: "Valid http/https URL is required for link proof." }, { status: 400 });
       }
     }
 
@@ -72,7 +84,7 @@ export async function POST(req) {
       proofType,
       proofUrl: finalProofUrl,
       description: description ? description.trim() : "",
-      timelineTaken: Number(timelineTaken),
+      timelineTaken: timelineDaysNum,
       visibility,
     });
 

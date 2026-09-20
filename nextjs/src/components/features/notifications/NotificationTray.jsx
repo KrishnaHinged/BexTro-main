@@ -26,14 +26,38 @@ export default function NotificationTray({ onClose }) {
     };
 
     useEffect(() => {
-        fetchNotifications();
+        let isCancelled = false;
+        async function fetchNotifs() {
+            try {
+                const res = await axiosInstance.get("/notifications");
+                if (!isCancelled) {
+                    setNotifications(res.data || []);
+                }
+            } catch (error) {
+                if (!isCancelled) {
+                    console.error("Error fetching notifications", error);
+                }
+            } finally {
+                if (!isCancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+        fetchNotifs();
 
         if (socket) {
-            socket.on("newNotification", (notif) => {
+            const handleNewNotification = (notif) => {
                 setNotifications(prev => [notif, ...prev]);
-            });
-            return () => socket.off("newNotification");
+            };
+            socket.on("newNotification", handleNewNotification);
+            return () => {
+                isCancelled = true;
+                socket.off("newNotification", handleNewNotification);
+            };
         }
+        return () => {
+            isCancelled = true;
+        };
     }, [socket]);
 
     const markAsRead = async () => {
@@ -150,7 +174,7 @@ export default function NotificationTray({ onClose }) {
                                         {getMessage(notif)}
                                         {notif.post && (
                                             <span className="text-charcoal/50 italic truncate block text-[10px] mt-0.5">
-                                                "{notif.post.challengeText}"
+                                                &quot;{notif.post.challengeText}&quot;
                                             </span>
                                         )}
                                     </p>

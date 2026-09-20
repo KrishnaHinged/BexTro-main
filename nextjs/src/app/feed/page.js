@@ -25,7 +25,6 @@ export default function FeedPage() {
     const debouncedSearch = useDebounce(searchQuery, 400);
 
     const fetchFeed = async (tab) => {
-        setLoading(true);
         try {
             const res = await axiosInstance.get(`/posts/feed?tab=${tab}`);
             setPosts(res.data || []);
@@ -85,9 +84,29 @@ export default function FeedPage() {
     }, [debouncedSearch]);
 
     useEffect(() => {
-        if (user?._id) {
-            fetchFeed(activeTab);
+        if (!user?._id) return;
+        let isCancelled = false;
+        async function load() {
+            try {
+                const res = await axiosInstance.get(`/posts/feed?tab=${activeTab}`);
+                if (!isCancelled) {
+                    setPosts(res.data || []);
+                }
+            } catch (error) {
+                if (!isCancelled) {
+                    console.error("Error fetching feed", error);
+                    setPosts([]);
+                }
+            } finally {
+                if (!isCancelled) {
+                    setLoading(false);
+                }
+            }
         }
+        load();
+        return () => {
+            isCancelled = true;
+        };
     }, [activeTab, user]);
 
     if (!isRehydrated) {
@@ -174,7 +193,7 @@ export default function FeedPage() {
                                             ))
                                         ) : !searching && (
                                             <div className="py-8 text-center bg-white rounded-2xl border border-cream-dark/60">
-                                                <p className="text-charcoal/50 text-sm italic font-medium">No builders found for "{searchQuery}"</p>
+                                                <p className="text-charcoal/50 text-sm italic font-medium">No builders found for &quot;{searchQuery}&quot;</p>
                                             </div>
                                         )}
                                     </motion.div>

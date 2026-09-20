@@ -51,7 +51,7 @@ export default function ProofModal({ challenge, onClose, onSuccess }) {
       formData.append("proofType", proofType);
       formData.append("description", proofDescription.trim());
       formData.append("visibility", proofVisibility);
-      formData.append("timelineTaken", challenge.timelineDays || 0);
+      formData.append("timelineTaken", challenge.timelineDays || 1);
 
       if (proofType === "image" || proofType === "video") {
         formData.append("proofFile", proofFile);

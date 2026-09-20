@@ -26,7 +26,7 @@ export default function HoldUpMessage() {
               Hold up<span className="text-indigo-600">.</span>
             </h1>
             <p className="text-charcoal/60 text-sm sm:text-base mt-3 max-w-md">
-              Let's make a real commitment to your future self.
+              Let&apos;s make a real commitment to your future self.
             </p>
           </div>
         </motion.div>

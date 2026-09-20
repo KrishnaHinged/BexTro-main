@@ -392,7 +392,7 @@ const GrowthProfileForm = ({ onComplete }) => {
                                     Distractions & Baseline Alignment
                                 </h2>
                                 <p className="text-charcoal/60 text-sm">
-                                    Bextro's Anti-Doomscroll and Rescue engines will guard your momentum against these patterns.
+                                    Bextro&apos;s Anti-Doomscroll and Rescue engines will guard your momentum against these patterns.
                                 </p>
                             </div>
 
